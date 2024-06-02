@@ -9,3 +9,4 @@ New web written in rust.
   - [ ] JS
 - [ ] DNS **Echo?**
 - [ ] Search Engine **Athena**
+- [ ] Web Server **Apollo?**
