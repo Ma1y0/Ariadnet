@@ -1,19 +1,31 @@
 # Build
+```bash
+cargo build --release
+```
 
-## Arch
+## Linux
+Arch
 
 ```bash
 sudo pacman -S gtk4 base-devel
 ```
 
-## Debian (Ubuntu)
+Debian (Ubuntu)
 
 ```bash
 sudo apt install libgtk-4-dev build-essential
 ```
 
-## Fedora
+Fedora
 
 ```bash
 sudo dnf install gtk4-devel gcc
 ```
+
+## MacOS
+```bash
+brew install gtk4
+```
+
+## Windows
+Good luck :)
