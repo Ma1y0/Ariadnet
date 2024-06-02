@@ -3,9 +3,9 @@
 New web written in rust.
 
 - [ ] Design the protocol
-- [ ] Browser
+- [ ] Browser **Hermes**
   - [ ] HTML
   - [ ] CSS
   - [ ] JS
-- [ ] DNS
-- [ ] Search Engine
+- [ ] DNS **Echo?**
+- [ ] Search Engine **Athena**
