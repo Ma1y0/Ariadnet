@@ -3,8 +3,14 @@
 cargo build --release
 ```
 
+<<<<<<< HEAD
 ## Linux
 Arch
+=======
+## Dependencies
+
+## Arch
+>>>>>>> ec43bfa (chore(hermes): update build.md)
 
 ```bash
 sudo pacman -S gtk4 base-devel
