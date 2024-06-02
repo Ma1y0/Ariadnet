@@ -1,16 +1,16 @@
 # Build
+
 ```bash
 cargo build --release
 ```
 
-<<<<<<< HEAD
 ## Linux
-Arch
-=======
+
+# Arch
+
 ## Dependencies
 
 ## Arch
->>>>>>> ec43bfa (chore(hermes): update build.md)
 
 ```bash
 sudo pacman -S gtk4 base-devel
@@ -29,9 +29,19 @@ sudo dnf install gtk4-devel gcc
 ```
 
 ## MacOS
+
 ```bash
 brew install gtk4
 ```
 
 ## Windows
+
 Good luck :)
+
+# Misc
+
+Check your gtk version
+
+```bash
+pkg-config --modversion gtk4
+```
