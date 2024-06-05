@@ -1,6 +1,8 @@
+use std::fmt::Display;
+
 use super::dom::Node;
 
-struct Parser {
+pub struct Parser {
     ch: u8,
     next_ch: u8,
     buffer: Vec<u8>,
@@ -9,7 +11,7 @@ struct Parser {
 
 impl Parser {
     pub fn new(s: String) -> Self {
-        let buffer = s.as_bytes();
+        let buffer = s.trim().as_bytes();
         Self {
             ch: buffer[0],
             next_ch: buffer[1],
@@ -18,14 +20,35 @@ impl Parser {
         }
     }
 
-    pub fn parse(&mut self) -> Node {
+    pub fn parse(&mut self) -> ParserResult {
+        Err(ParseError::ParseError())
+    }
+
+    fn parse_node() -> Node {
         unimplemented!()
     }
 }
 
+#[derive(Debug)]
+enum ParseError {
+    ParseError(),
+}
+
+impl Display for ParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ParseError() => writeln!(f, "Failed to parse"),
+        }
+    }
+}
+
+impl std::error::Error for ParseError {}
+
+type ParserResult = Result<Node, ParseError>;
+
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
+    use std::collections::HashMap; //{{{
 
     use super::*;
 
@@ -38,6 +61,9 @@ mod tests {
         let mut parser = Parser::new(s_tag.to_string());
         let dom = parser.parse();
 
-        assert_eq!(tag_node, dom);
-    }
+        match dom {
+            Ok(a) => assert_eq!(tag_node, a),
+            Err(e) => panic!("{e}"),
+        }
+    } //}}}
 }
