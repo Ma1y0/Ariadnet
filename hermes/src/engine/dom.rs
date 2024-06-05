@@ -26,7 +26,7 @@ enum NodeType {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-struct Node {
+pub struct Node {
     children: Vec<Node>,
     node_type: NodeType,
 }
