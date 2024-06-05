@@ -17,8 +17,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y libgtk-4-dev build-essential libpango1.0-dev libgraphene-1.0-dev
+      run: sudo apt-get update && sudo apt-get install -y libgtk-4-dev build-essential libpango1.0-dev libgraphene-1.0-dev pkg-config
+    - name: Set PKG_CONFIG_PATH
+      run: echo "/usr/lib/x86_64-linux-gnu/pkgconfig" >> $GITHUB_ENV
     - name: Build
-      run: cd hermes; cargo build --verbose
+      run: |
+        cd hermes
+        export PKG_CONFIG_PATH="/usr/lib/x86_64-linux-gnu/pkgconfig"
+        cargo build --verbose
     - name: Run tests
-      run: cd hermes; cargo test --verbose
+      run: |
+        cd hermes
+        export PKG_CONFIG_PATH="/usr/lib/x86_64-linux-gnu/pkgconfig"
+        cargo test --verbose
