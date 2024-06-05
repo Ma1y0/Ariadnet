@@ -16,10 +16,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Set up PKG_CONFIG_PATH
+      run: |
+        echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/path/to/your/project/pkgconfig" >> $GITHUB_ENV
     - name: Install dependencies
       run: |
-          sudo apt update
-          sudo apt install -y libgtk-4-dev build-essential
+        sudo apt update
+        sudo apt install -y libgtk-4-dev build-essential
     - name: Build
       run: |
         cd hermes
