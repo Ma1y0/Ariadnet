@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, PartialEq, Clone)]
-struct Tag {
+pub struct Tag {
     name: String,
     attributes: HashMap<String, String>,
 }
@@ -20,15 +20,15 @@ impl Tag {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-enum NodeType {
+pub enum NodeType {
     Element(Tag),
     Text(String),
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Node {
-    children: Vec<Node>,
-    node_type: NodeType,
+    pub children: Vec<Node>,
+    pub node_type: NodeType,
 }
 
 impl Node {

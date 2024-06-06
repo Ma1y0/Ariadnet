@@ -1,69 +1,85 @@
-use std::fmt::Display;
-
 use super::dom::Node;
+use std::{iter::Peekable, str::Chars};
 
-pub struct Parser {
-    ch: u8,
-    next_ch: u8,
-    buffer: Vec<u8>,
-    index: usize,
+struct Parser<'a> {
+    buffer: Peekable<Chars<'a>>,
 }
 
-impl Parser {
-    pub fn new(s: String) -> Self {
-        let buffer = s.trim().as_bytes();
+impl<'a> Parser<'a> {
+    pub fn new(s: &'a str) -> Self {
         Self {
-            ch: buffer[0],
-            next_ch: buffer[1],
-            buffer: buffer.to_vec(),
-            index: 0,
+            buffer: s.chars().peekable(),
         }
     }
 
-    pub fn parse(&mut self) -> ParserResult {
-        Err(ParseError::ParseError())
-    }
+    pub fn parse(&mut self) -> Vec<Node> {
+        let mut nodes = Vec::new();
 
-    fn parse_node() -> Node {
-        unimplemented!()
-    }
-}
+        while self.buffer.peek().is_some() {
+            self.consume_while(char::is_whitespace);
 
-#[derive(Debug)]
-enum ParseError {
-    ParseError(),
-}
-
-impl Display for ParseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::ParseError() => writeln!(f, "Failed to parse"),
+            if self.buffer.peek().map_or(false, |x| *x == '<') {
+                // Is tag
+            } else {
+                // Is text node
+                nodes.push(self.parse_text_node())
+            }
         }
+
+        nodes
+    }
+
+    fn parse_text_node(&mut self) -> Node {
+        let text = self.consume_while(|x| x != '<');
+
+        Node::new_text(text)
+    }
+
+    fn consume_while<F>(&mut self, condition: F) -> String
+    where
+        F: Fn(char) -> bool,
+    {
+        let mut s = String::new();
+
+        while self.buffer.peek().map_or(false, |x| condition(*x)) {
+            s.push(self.buffer.next().unwrap());
+        }
+
+        s
     }
 }
-
-impl std::error::Error for ParseError {}
-
-type ParserResult = Result<Node, ParseError>;
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap; //{{{
+    use crate::engine::dom::NodeType;
 
+    //{{{
     use super::*;
 
     #[test]
-    fn parse_tag() {
-        let s_tag = "<p>Hello World</p>";
-        let text_node = Node::new_text("Hello World".to_string());
-        let tag_node = Node::new_element("p".to_string(), HashMap::new(), vec![text_node]);
+    fn test_consume_while() {
+        let s = "              Hello";
+        let mut parser = Parser::new(s);
+        let consumed = parser.consume_while(char::is_whitespace);
 
-        let mut parser = Parser::new(s_tag.to_string());
+        assert_eq!(s.trim(), parser.buffer.collect::<String>());
+        assert_eq!("              ".to_string(), consumed);
+    }
+
+    #[test]
+    fn test_parse_text_node() {
+        let s = "How are you today?";
+        let mut parser = Parser::new(s);
         let dom = parser.parse();
 
-        match dom {
-            Ok(a) => assert_eq!(tag_node, a),
-            Err(e) => panic!("{e}"),
-        }
-    } //}}}
+        assert_eq!(1, dom.len(), "There should be only one node");
+        assert_eq!(
+            NodeType::Text(s.to_string()),
+            dom[0].node_type,
+            "The node should be a text node of {}, insed it is {:?}",
+            s,
+            dom[0].node_type
+        );
+    }
+    //}}}
 }
