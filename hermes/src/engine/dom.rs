@@ -7,6 +7,10 @@ pub struct Tag {
 }
 
 impl Tag {
+    pub fn new(name: String, attributes: HashMap<String, String>) -> Self {
+        Self { name, attributes }
+    }
+
     pub fn id(&self) -> Option<&String> {
         self.attributes.get("id")
     }
