@@ -56,7 +56,7 @@ impl TryFrom<&[u8]> for Packet {
     type Error = anyhow::Error;
 
     fn try_from(buf: &[u8]) -> std::result::Result<Self, Self::Error> {
-        if buf.len() < 4 {
+        if buf.len() < 3 {
             return Err(anyhow!("Packet muse be at least 4 bytes long"));
         }
 
@@ -64,10 +64,6 @@ impl TryFrom<&[u8]> for Packet {
         let method = buf[1];
         let error = buf[2];
         let body = String::from_utf8(buf[3..].to_vec())?;
-
-        if body.is_empty() {
-            return Err(anyhow!("Body can't be empty"));
-        }
 
         Ok(Packet {
             version,
