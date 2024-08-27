@@ -1,3 +1,6 @@
+use std::collections::HashMap;
+
+use anyhow::Context;
 use clap::Parser;
 use echo::{
     args::{Args, Commands},
@@ -13,7 +16,7 @@ async fn main() -> anyhow::Result<()> {
 
     match args.command {
         Commands::Add { key, value } => add_record(&mut store, &key, &value).await,
-        Commands::Print { n } => print_records(&store, n),
+        Commands::Print { n, json } => print_records(&store, n, json),
         Commands::Serve => {
             let port = std::env::var("ECHO_PORT").unwrap_or("53".to_string());
 
@@ -22,10 +25,28 @@ async fn main() -> anyhow::Result<()> {
     }
 }
 
-fn print_records(store: &Store, n: Option<usize>) -> anyhow::Result<()> {
-    // Prints n kv pairs or prints the whole map
-    for (key, value) in store.iter().take(n.unwrap_or(store.len())) {
-        println!("{key}: {value}")
+fn print_records(store: &Store, n: Option<usize>, json: bool) -> anyhow::Result<()> {
+    if json {
+        // Prints as JSON
+        match n {
+            Some(n) => {
+                let store: HashMap<_, _> = store.iter().take(n).collect();
+                println!(
+                    "{}",
+                    serde_json::to_string_pretty(&store)
+                        .context("Failed to convert map to json")?
+                )
+            }
+            None => println!(
+                "{}",
+                serde_json::to_string_pretty(&store).context("Failed to convert map to json")?
+            ),
+        }
+    } else {
+        // Prints n kv pairs or prints the whole map
+        for (key, value) in store.iter().take(n.unwrap_or(store.len())) {
+            println!("{key}: {value}")
+        }
     }
 
     Ok(())

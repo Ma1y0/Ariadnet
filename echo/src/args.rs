@@ -18,5 +18,8 @@ pub enum Commands {
         /// How many
         #[arg(short)]
         n: Option<usize>,
+        /// Print records as JSON
+        #[arg(long)]
+        json: bool,
     },
 }
