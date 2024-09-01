@@ -87,12 +87,12 @@ impl From<Packet> for Vec<u8> {
 }
 
 impl Packet {
-    pub fn new(version: u8, method: Method, error: Error, body: String) -> Self {
+    pub fn new(version: u8, method: Method, error: Error, body: impl Into<String>) -> Self {
         Self {
             version,
             method,
             error,
-            body,
+            body: body.into(),
         }
     }
 }

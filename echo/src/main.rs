@@ -1,12 +1,11 @@
-use std::collections::HashMap;
-
 use anyhow::Context;
 use clap::Parser;
 use echo::{
     args::{Args, Commands},
     kv::{self, Store},
-    packet::Packet,
+    server::serve,
 };
+use std::collections::HashMap;
 use tokio::net::UdpSocket;
 
 #[tokio::main]
@@ -19,12 +18,14 @@ async fn main() -> anyhow::Result<()> {
         Commands::Print { n, json } => print_records(&store, n, json),
         Commands::Serve => {
             let port = std::env::var("ECHO_PORT").unwrap_or("53".to_string());
+            let socket = UdpSocket::bind(format!("127.0.0.1:{port}").as_str()).await?;
 
-            serve(format!("127.0.0.1:{port}").as_str()).await
+            serve(socket).await
         }
     }
 }
 
+/// Prints records
 fn print_records(store: &Store, n: Option<usize>, json: bool) -> anyhow::Result<()> {
     if json {
         // Prints as JSON
@@ -52,20 +53,8 @@ fn print_records(store: &Store, n: Option<usize>, json: bool) -> anyhow::Result<
     Ok(())
 }
 
+/// Adds kv record to the store
 async fn add_record(store: &mut Store, key: &str, value: &str) -> anyhow::Result<()> {
     store.insert(key, value).await;
     Ok(())
-}
-
-async fn serve(addr: &str) -> anyhow::Result<()> {
-    let socket = UdpSocket::bind(addr).await?;
-
-    loop {
-        let mut buf = [0u8; 1024];
-
-        let (len, _) = socket.recv_from(&mut buf).await?;
-        println!("{:?}", &buf[..len]);
-        let packet = Packet::try_from(&buf[..len])?;
-        println!("{:?}", packet);
-    }
 }
