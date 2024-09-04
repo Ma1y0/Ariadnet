@@ -35,7 +35,7 @@ async fn run() -> anyhow::Result<()> {
             let socket = UdpSocket::bind(format!("127.0.0.1:{port}").as_str()).await?;
 
             info!("The server is listening on :{port}");
-            serve(socket, &store).await
+            serve(socket, store).await
         }
     }
 }

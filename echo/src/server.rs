@@ -2,19 +2,43 @@ use crate::{
     kv::Store,
     packet::{self, Method, Packet},
 };
-use std::net::SocketAddr;
+use std::{net::SocketAddr, sync::Arc};
 use tokio::net::UdpSocket;
 use tracing::{error, info};
 
 /// Start the server
-pub async fn serve(socket: UdpSocket, store: &Store) -> anyhow::Result<()> {
+// pub async fn serve(socket: UdpSocket, store: &Store) -> anyhow::Result<()> {
+//     loop {
+//         let mut buf = [0u8; 1024];
+//
+//         let (len, source) = socket.recv_from(&mut buf).await?;
+//         info!("Recived {} bytes from {}", len, source);
+//         let packet = Packet::try_from(&buf[..len])?;
+//         handle(&packet, &socket, &source, store).await;
+//     }
+// }
+pub async fn serve(socket: UdpSocket, store: Store) -> anyhow::Result<()> {
+    let socket = Arc::new(socket);
+    let store = Arc::new(store);
+
     loop {
         let mut buf = [0u8; 1024];
 
+        let store = Arc::clone(&store);
+        let socket = Arc::clone(&socket);
+
         let (len, source) = socket.recv_from(&mut buf).await?;
-        info!("Recived {} bytes from {}", len, source);
-        let packet = Packet::try_from(&buf[..len])?;
-        handle(&packet, &socket, &source, store).await;
+        info!("Received {} bytes from {}", len, source);
+        tokio::spawn(async move {
+            let packet = match Packet::try_from(&buf[..len]) {
+                Ok(packet) => packet,
+                Err(e) => {
+                    error!("Failed to parse packet: {:?}, error: {e}", &buf[..len]);
+                    return;
+                }
+            };
+            handle(&packet, socket.as_ref(), &source, store.as_ref()).await;
+        });
     }
 }
 
