@@ -6,7 +6,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 server_address = ("127.0.0.1", 8080)
 
-message = bytes([1, 0, 0, 72, 105, 33])
+message = bytes([33, 255, 236])
 
 try:
     # Send data

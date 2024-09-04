@@ -2,10 +2,10 @@ use anyhow::anyhow;
 
 #[derive(Debug, PartialEq)]
 pub struct Packet {
-    version: u8,
-    method: Method,
-    error: Error,
-    body: String,
+    pub version: u8,
+    pub method: Method,
+    pub error: Error,
+    pub body: String,
 }
 
 #[derive(Debug, PartialEq)]

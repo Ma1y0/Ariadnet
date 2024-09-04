@@ -1,9 +1,11 @@
+use echo::kv::Store;
 use std::net::SocketAddr;
+use std::sync::Arc;
 use tokio::net::UdpSocket;
 use tokio::sync::oneshot;
 use tokio::time::{sleep, Duration};
 
-async fn spawn_server() -> (SocketAddr, oneshot::Sender<()>) {
+async fn spawn_server(store: Arc<Store>) -> (SocketAddr, oneshot::Sender<()>) {
     let socket = UdpSocket::bind("127.0.0.1:0")
         .await
         .expect("Failed to bind server socket");
@@ -13,7 +15,7 @@ async fn spawn_server() -> (SocketAddr, oneshot::Sender<()>) {
 
     tokio::spawn(async move {
         tokio::select! {
-            _ = echo::server::serve(socket) => {
+            _ = echo::server::serve(socket, store.as_ref()) => {
                 println!("Server stopped");
             }
             _ = shutdown_rx => {
@@ -27,7 +29,8 @@ async fn spawn_server() -> (SocketAddr, oneshot::Sender<()>) {
 
 #[tokio::test]
 async fn test_resolve_query() {
-    let (addr, shutdown_tx) = spawn_server().await;
+    let store = Arc::new(Store::load().await.expect("Failed to open store"));
+    let (addr, shutdown_tx) = spawn_server(Arc::clone(&store)).await;
 
     // Give the server some time to start up
     sleep(Duration::from_millis(100)).await;
