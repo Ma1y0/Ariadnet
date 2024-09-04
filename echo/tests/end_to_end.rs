@@ -28,8 +28,8 @@ async fn spawn_server(store: Arc<Store>) -> (SocketAddr, oneshot::Sender<()>) {
 }
 
 #[tokio::test]
-async fn test_resolve_query() {
-    let store = Arc::new(Store::load().await.expect("Failed to open store"));
+async fn test_resolve_query_not_found() {
+    let store = Arc::new(Store::in_memory());
     let (addr, shutdown_tx) = spawn_server(Arc::clone(&store)).await;
 
     // Give the server some time to start up

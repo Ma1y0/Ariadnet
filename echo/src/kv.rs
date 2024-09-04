@@ -18,22 +18,22 @@ impl Store {
         Self::read().await
     }
 
-    // Will be very slow
-    pub async fn insert(&mut self, key: &str, v: &str) -> Option<Box<str>> {
-        let value = self.0.insert(key.into(), v.into());
-        // Maybe cloning the hashmap?
-        if let Err(e) = self.write().await {
-            eprintln!("ERROR: Failed to write to file: {}", e);
-        }
-        value
+    pub fn in_memory() -> Self {
+        Self::new()
     }
 
-    fn new() -> Store {
-        Store(HashMap::new())
+    pub fn insert(&mut self, key: &str, value: &str) -> Option<Box<str>> {
+        self.0.insert(key.into(), value.into())
+    }
+
+    pub async fn insert_write(&mut self, key: &str, value: &str) -> anyhow::Result<()> {
+        self.insert(key, value);
+        self.write().await
     }
 
     // Writes Store into store.bin file
-    async fn write(&self) -> anyhow::Result<()> {
+    // Slow (I think)
+    pub async fn write(&self) -> anyhow::Result<()> {
         let mut file = fs::File::create("./store.bin")
             .await
             .context("Failed to open/crate store.bin")?;
@@ -47,6 +47,10 @@ impl Store {
             .context("Failed to write data to file")?;
         // Makes sure the data were written to the file
         file.sync_all().await.context("Failed to sync the file")
+    }
+
+    fn new() -> Store {
+        Store(HashMap::new())
     }
 
     // Reads Store from store.bin

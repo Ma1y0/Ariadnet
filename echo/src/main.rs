@@ -12,7 +12,7 @@ use tracing::{error, info};
 #[tokio::main]
 async fn main() {
     match run().await {
-        Ok(_) => unreachable!(":("),
+        Ok(_) => (),
         Err(e) => {
             error!("Error ocured during server runtime: error={e}");
             exit(5);
@@ -70,7 +70,7 @@ fn print_records(store: &Store, n: Option<usize>, json: bool) -> anyhow::Result<
 
 /// Adds kv record to the store
 async fn add_record(store: &mut Store, key: &str, value: &str) -> anyhow::Result<()> {
-    store.insert(key, value).await;
+    store.insert_write(key, value).await?;
     info!("Successfully added record: {key}: {value}");
     Ok(())
 }
