@@ -112,6 +112,7 @@ mod tests {
             body: "Hi".to_string(),
         };
 
+        // Tests
         assert!(packet.is_ok());
         assert_eq!(expected, packet.unwrap());
     }
@@ -127,6 +128,16 @@ mod tests {
         let expected = vec![1u8, 0, 0, 72, 105];
         let buf: Vec<u8> = packet.into();
 
+        // Tests
         assert_eq!(expected, buf);
+    }
+
+    #[test]
+    fn test_parse_invalid_packet_fail() {
+        let buf = [200u8, 255, 255];
+        let packet = Packet::try_from(&buf as &[u8]);
+
+        // Tests
+        assert!(packet.is_err());
     }
 }

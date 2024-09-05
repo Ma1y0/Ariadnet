@@ -7,16 +7,6 @@ use tokio::net::UdpSocket;
 use tracing::{error, info};
 
 /// Start the server
-// pub async fn serve(socket: UdpSocket, store: &Store) -> anyhow::Result<()> {
-//     loop {
-//         let mut buf = [0u8; 1024];
-//
-//         let (len, source) = socket.recv_from(&mut buf).await?;
-//         info!("Recived {} bytes from {}", len, source);
-//         let packet = Packet::try_from(&buf[..len])?;
-//         handle(&packet, &socket, &source, store).await;
-//     }
-// }
 pub async fn serve(socket: UdpSocket, store: Store) -> anyhow::Result<()> {
     let socket = Arc::new(socket);
     let store = Arc::new(store);
