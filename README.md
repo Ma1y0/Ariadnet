@@ -1,12 +1,12 @@
-# web
+# Ariadne
 
 New web written in rust.
 
-- [ ] Design the protocol
 - [ ] Browser **Hermes**
   - [ ] HTML
   - [ ] CSS
   - [ ] JS
-- [ ] DNS **Echo?**
+- [X] DNS-ish **Echo**
+  - [ ] Systemd daemon
 - [ ] Search Engine **Athena**
 - [ ] Web Server **Apollo?**
