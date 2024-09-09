@@ -1,6 +1,6 @@
 # Ariadne
 
-New web written in rust.
+Web rewritten in rust.
 
 - [ ] Browser **Hermes**
   - [ ] HTML
@@ -8,5 +8,6 @@ New web written in rust.
   - [ ] JS
 - [X] DNS-ish **Echo**
   - [ ] Systemd daemon
+  - [ ] Docker container
 - [ ] Search Engine **Athena**
 - [ ] Web Server **Apollo?**
