@@ -8,16 +8,10 @@ use std::{
 /// Token
 #[derive(Debug, PartialEq)]
 pub enum Token {
-    OpeningTag(Tag),
-    ClosingTag(Tag),
-    SelfClosing(Tag),
+    OpeningTag(String),
+    ClosingTag(String),
+    SelfClosing(String),
     Literal(String),
-}
-
-/// Tag
-#[derive(Debug, PartialEq)]
-pub struct Tag {
-    tag_type: String,
 }
 
 pub struct Tokenizer<'a>(Peekable<Chars<'a>>);
@@ -55,18 +49,18 @@ impl<'a> Tokenizer<'a> {
             match c {
                 '>' => {
                     self.next(); // Consume '>'
-                    return Ok(Token::OpeningTag(Tag { tag_type }));
+                    return Ok(Token::OpeningTag(tag_type));
                 }
                 '/' => {
                     self.next(); // Consume '/'
                     if self.next() == Some('>') {
-                        return Ok(Token::SelfClosing(Tag { tag_type }));
+                        return Ok(Token::SelfClosing(tag_type));
                     } else {
                         return Err(HTMLError::InvalidSyntax);
                     }
                 }
                 _ => {
-                    self.next();
+                    self.next(); // Consume whitespace (I hope)
                 }
             }
         }
@@ -78,7 +72,7 @@ impl<'a> Tokenizer<'a> {
         let tag_type = self.parse_tag_type()?;
 
         if self.next() == Some('>') {
-            Ok(Token::ClosingTag(Tag { tag_type }))
+            Ok(Token::ClosingTag(tag_type))
         } else {
             Err(HTMLError::InvalidSyntax)
         }
@@ -113,7 +107,7 @@ impl<'a> Tokenizer<'a> {
             }
         }
 
-        Ok(Token::Literal(literal))
+        Ok(Token::Literal(literal.trim().to_string()))
     }
 }
 
@@ -156,12 +150,8 @@ mod tests {
         let mut tokenizer = Tokenizer::new(s);
         let tokens = tokenizer.parse();
         let expected = vec![
-            Token::OpeningTag(Tag {
-                tag_type: "h1".to_string(),
-            }),
-            Token::ClosingTag(Tag {
-                tag_type: "h1".to_string(),
-            }),
+            Token::OpeningTag("h1".to_string()),
+            Token::ClosingTag("h1".to_string()),
         ];
 
         // Tests
@@ -176,9 +166,7 @@ mod tests {
         let s = "<img />";
         let mut tokenizer = Tokenizer::new(s);
         let tokens = tokenizer.parse();
-        let expected = vec![Token::SelfClosing(Tag {
-            tag_type: "img".to_string(),
-        })];
+        let expected = vec![Token::SelfClosing("img".to_string())];
 
         // Tests
         assert!(tokens.is_ok());
@@ -193,19 +181,33 @@ mod tests {
         let mut tokenizer = Tokenizer::new(s);
         let tokens = tokenizer.parse();
         let expected = vec![
-            Token::OpeningTag(Tag {
-                tag_type: "h1".to_string(),
-            }),
+            Token::OpeningTag("h1".to_string()),
             Token::Literal("Hello World".to_string()),
-            Token::ClosingTag(Tag {
-                tag_type: "h1".to_string(),
-            }),
+            Token::ClosingTag("h1".to_string()),
         ];
 
         // Tests
         assert!(tokens.is_ok());
         let tokens = tokens.unwrap();
         // assert_eq!(2, tokens.len());
+        assert_eq!(expected, tokens);
+    }
+
+    #[test]
+    fn test_combined() {
+        let s = "<h1>Hello <img /></h1>";
+        let mut tokenizer = Tokenizer::new(s);
+        let tokens = tokenizer.parse();
+        let expected = vec![
+            Token::OpeningTag("h1".to_string()),
+            Token::Literal("Hello".to_string()),
+            Token::SelfClosing("img".to_string()),
+            Token::ClosingTag("h1".to_string()),
+        ];
+
+        // Tests
+        assert!(tokens.is_ok());
+        let tokens = tokens.unwrap();
         assert_eq!(expected, tokens);
     }
 }
