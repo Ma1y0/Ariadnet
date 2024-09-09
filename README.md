@@ -1,6 +1,6 @@
 # Ariadne
 
-Web rewritten in rust.
+Web reimagined in rust.
 
 - [ ] Browser **Hermes**
   - [ ] HTML
