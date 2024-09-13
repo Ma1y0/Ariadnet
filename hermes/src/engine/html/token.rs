@@ -6,7 +6,7 @@ use std::{
 };
 
 /// Token
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Token {
     OpeningTag(String),
     ClosingTag(String),
@@ -18,7 +18,17 @@ pub struct Tokenizer<'a>(Peekable<Chars<'a>>);
 
 impl<'a> Tokenizer<'a> {
     pub fn new(s: &'a str) -> Self {
-        Tokenizer(s.trim().chars().peekable())
+        let content = s
+            .lines()
+            .map(|line| line.trim())
+            .collect::<Vec<&str>>()
+            .join("\n");
+
+        // Create a static str from the String to get a 'static lifetime
+        // I have no idea what does this do.
+        let static_str: &'static str = Box::leak(content.clone().into_boxed_str());
+
+        Tokenizer(static_str.chars().peekable())
     }
 
     pub fn parse(&mut self) -> Result<Vec<Token>, HTMLError> {
@@ -90,7 +100,7 @@ impl<'a> Tokenizer<'a> {
         }
 
         if tag_type.is_empty() {
-            Err(HTMLError::InvalidTagName)
+            Err(HTMLError::InvalidTag)
         } else {
             Ok(tag_type)
         }
@@ -98,6 +108,8 @@ impl<'a> Tokenizer<'a> {
 
     fn parse_literal(&mut self) -> Result<Token, HTMLError> {
         let mut literal = String::new();
+
+        dbg!(self.clone().collect::<String>());
 
         while let Some(&c) = self.peek() {
             if c != '<' {

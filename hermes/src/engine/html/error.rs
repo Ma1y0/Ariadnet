@@ -4,7 +4,7 @@ use std::fmt::Display;
 pub enum HTMLError {
     UnexpectedEndOfInput,
     InvalidSyntax,
-    InvalidTagName,
+    InvalidTag,
     Other(String),
 }
 
@@ -13,7 +13,7 @@ impl Display for HTMLError {
         match self {
             Self::UnexpectedEndOfInput => write!(f, "Unexpected End Of Input"),
             Self::InvalidSyntax => write!(f, "Invalid Syntax"),
-            Self::InvalidTagName => write!(f, "Invalid Tag Name"),
+            Self::InvalidTag => write!(f, "Invalid Tag Name"),
             Self::Other(s) => write!(f, "{}", s),
         }
     }
