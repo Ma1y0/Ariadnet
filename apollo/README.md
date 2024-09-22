@@ -16,6 +16,8 @@ Aethon ("Blazing") is the name of protocol used by Ariadnet. It uses TCP under t
 -----------------------------------
 | \n |
 -----------------------------------
+| \n |
+-----------------------------------
 | BODY |
 -----------------------------------
 ```
@@ -45,6 +47,7 @@ Aethon ("Blazing") is the name of protocol used by Ariadnet. It uses TCP under t
 
 - The content of the packet
 - An UTF-8 string
+- It's divided from rest of the packet by double newline (\n\n)
 
 ## Response
 
