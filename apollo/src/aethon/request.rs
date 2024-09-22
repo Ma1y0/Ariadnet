@@ -1,11 +1,11 @@
 use super::{method::Method, Error};
 use std::{
     collections::HashMap,
+    fmt::Display,
     iter::Peekable,
+    ops::{Deref, DerefMut},
     str::{Chars, FromStr},
 };
-
-type Headers = HashMap<Box<str>, Box<str>>;
 
 #[derive(Debug, PartialEq)]
 pub struct Request {
@@ -18,7 +18,7 @@ pub struct Request {
 
 impl Request {
     pub fn new(
-        version: u8, method: Method, path: impl Into<String>, headers: HashMap<Box<str>, Box<str>>,
+        version: u8, method: Method, path: impl Into<String>, headers: Headers,
         body: impl Into<String>,
     ) -> Self {
         Self {
@@ -84,7 +84,7 @@ impl Request {
     }
 
     fn parser_headers(buffer: &mut Peekable<Chars>) -> Result<Headers, Error> {
-        let mut headers = HashMap::new();
+        let mut headers = Headers::new();
         let buffer = Self::consume_headers(buffer);
 
         for line in buffer.lines() {
@@ -121,6 +121,62 @@ impl FromStr for Request {
     }
 }
 
+impl Display for Request {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // Version
+        // (1-9) + 48 = ASCII representation
+        write!(f, "{} ", (self.version + 48) as char)?;
+        // Method
+        write!(f, "{} ", self.method)?;
+        // Path
+        writeln!(f, "{}", self.path)?;
+        // Headers
+        writeln!(f, "{}", self.headers)?;
+        // Body
+        write!(f, "{}", self.body)?;
+
+        Ok(())
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Headers(HashMap<Box<str>, Box<str>>);
+
+impl Headers {
+    fn new() -> Self {
+        Headers(HashMap::new())
+    }
+}
+
+impl Deref for Headers {
+    type Target = HashMap<Box<str>, Box<str>>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Headers {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+impl Display for Headers {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for (k, v) in self.iter() {
+            writeln!(f, "{}: {}", k, v)?;
+        }
+
+        Ok(())
+    }
+}
+
+impl From<HashMap<Box<str>, Box<str>>> for Headers {
+    fn from(map: HashMap<Box<str>, Box<str>>) -> Self {
+        Headers(map)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -130,7 +186,7 @@ mod tests {
         let s = "1 GET /\na: hello\nc: b\n\nHello World";
         let req: Request = s.parse().unwrap();
 
-        let mut expected_headers: Headers = HashMap::new();
+        let mut expected_headers: Headers = Headers::new();
         expected_headers.insert("a".into(), "hello".into());
         expected_headers.insert("c".into(), "b".into());
 
@@ -157,5 +213,17 @@ mod tests {
 
         // Tests
         assert_eq!(expected, req);
+    }
+
+    #[test]
+    fn test_to_string() {
+        let headers: HashMap<Box<str>, Box<str>> =
+            HashMap::from([("1".into(), "Hello".into()), ("2".into(), "World".into())]);
+        let req = Request::new(1, Method::GET, "/", headers.into(), "");
+        let s = req.to_string();
+        let expected = "1 GET /\n1: Hello\n2: World\n\n";
+
+        // Tests
+        assert_eq!(expected, s);
     }
 }
