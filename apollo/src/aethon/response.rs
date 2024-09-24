@@ -1,5 +1,6 @@
 use super::{headers::Headers, status::Status, Error};
 use std::{
+    fmt::Display,
     iter::Peekable,
     str::{Chars, FromStr},
 };
@@ -64,6 +65,22 @@ impl FromStr for Response {
     }
 }
 
+impl Display for Response {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // Version
+        // (1-9) + 48 = ASCII representation
+        write!(f, "{} ", (self.version + 48) as char)?;
+        // Status
+        writeln!(f, "{}", self.status)?;
+        // Headers
+        writeln!(f, "{}", self.headers)?;
+        // Body
+        write!(f, "{}", self.body)?;
+
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::collections::BTreeMap;
@@ -71,7 +88,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_str() {
+    fn test_parse_tesponse() {
         let s: Result<Response, Error> = "1 200\nh: Hello\nw:World\n\nHello World".parse();
         let expected = Ok(Response::new(
             1,
@@ -85,5 +102,22 @@ mod tests {
 
         // Tests
         assert_eq!(expected, s);
+    }
+
+    #[test]
+    fn test_response_to_string() {
+        let res = Response::new(
+            1,
+            Status::OK,
+            Headers::from(BTreeMap::from([
+                ("h".into(), "Hello".into()),
+                ("w".into(), "World".into()),
+            ])),
+            "Hello World",
+        );
+        let expected = "1 200\nh: Hello\nw: World\n\nHello World";
+
+        // Tests
+        assert_eq!(expected, res.to_string());
     }
 }
