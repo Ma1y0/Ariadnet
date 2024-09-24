@@ -38,7 +38,7 @@ impl Request {
             .parse()
             .map_err(|_| Error::ParseError("Invalid method"))?;
         let path: String = Self::consume_string(&mut buffer, '\n');
-        let headers = Self::parser_headers(&mut buffer)?;
+        let headers = Headers::parser_headers(&mut buffer)?;
         let body = buffer.collect();
 
         Ok(Request {
@@ -62,53 +62,6 @@ impl Request {
         }
 
         s
-    }
-
-    fn consume_headers(buffer: &mut Peekable<Chars>) -> String {
-        let mut result = String::new();
-        let mut last_char_was_newline = false;
-
-        while let Some(&c) = buffer.peek() {
-            if c == '\n' && last_char_was_newline {
-                buffer.next(); // consume the \n
-                break;
-            }
-
-            result.push(buffer.next().unwrap());
-            last_char_was_newline = c == '\n';
-        }
-
-        result
-    }
-
-    fn parser_headers(buffer: &mut Peekable<Chars>) -> Result<Headers, Error> {
-        let mut headers = Headers::new();
-        let buffer = Self::consume_headers(buffer);
-
-        for line in buffer.lines() {
-            if line.is_empty() {
-                break;
-            }
-
-            let mut kv = line.splitn(2, ':');
-            let key = kv.next().ok_or(Error::ParseError("Invalid headers key"))?;
-            let value = kv
-                .next()
-                .ok_or(Error::ParseError("Invalid headers value"))?;
-
-            if key.trim().is_empty() {
-                break;
-            }
-
-            let value = value.trim();
-            if value.is_empty() {
-                return Err(Error::ParseError("Headers value can't be empty"));
-            }
-
-            headers.insert(key.into(), value.into());
-        }
-
-        Ok(headers)
     }
 }
 
