@@ -10,4 +10,6 @@ Web reimagined in rust.
   - [ ] Systemd daemon
   - [ ] Docker container
 - [ ] Search Engine **Athena**
-- [ ] Web Server **Apollo?**
+- [ ] Web Server **Apollo**
+- [ ]  Protocol **Aethon**
+  - [ ] Curl-like tool for testing
