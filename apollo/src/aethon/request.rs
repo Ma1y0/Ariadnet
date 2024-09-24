@@ -1,6 +1,6 @@
 use super::{method::Method, Error};
 use std::{
-    collections::HashMap,
+    collections::BTreeMap,
     fmt::Display,
     iter::Peekable,
     ops::{Deref, DerefMut},
@@ -140,16 +140,16 @@ impl Display for Request {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Headers(HashMap<Box<str>, Box<str>>);
+pub struct Headers(BTreeMap<Box<str>, Box<str>>);
 
 impl Headers {
     fn new() -> Self {
-        Headers(HashMap::new())
+        Headers(BTreeMap::new())
     }
 }
 
 impl Deref for Headers {
-    type Target = HashMap<Box<str>, Box<str>>;
+    type Target = BTreeMap<Box<str>, Box<str>>;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -171,8 +171,8 @@ impl Display for Headers {
     }
 }
 
-impl From<HashMap<Box<str>, Box<str>>> for Headers {
-    fn from(map: HashMap<Box<str>, Box<str>>) -> Self {
+impl From<BTreeMap<Box<str>, Box<str>>> for Headers {
+    fn from(map: BTreeMap<Box<str>, Box<str>>) -> Self {
         Headers(map)
     }
 }
@@ -217,8 +217,8 @@ mod tests {
 
     #[test]
     fn test_to_string() {
-        let headers: HashMap<Box<str>, Box<str>> =
-            HashMap::from([("1".into(), "Hello".into()), ("2".into(), "World".into())]);
+        let headers: BTreeMap<Box<str>, Box<str>> =
+            BTreeMap::from([("1".into(), "Hello".into()), ("2".into(), "World".into())]);
         let req = Request::new(1, Method::GET, "/", headers.into(), "");
         let s = req.to_string();
         let expected = "1 GET /\n1: Hello\n2: World\n\n";

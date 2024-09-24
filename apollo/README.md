@@ -71,8 +71,16 @@ Aethon ("Blazing") is the name of protocol used by Ariadnet. It uses TCP under t
 ### STATUS
 
 - Indicates STATUS of the response
-- 2\*\* == OK
-- 1\*\* == Error
+- **Successful responses**
+  - 200 OK
+  - 201 Created
+- **Client error responses**
+  - 400 Bad Request
+  - 404 Not Found
+  - 405 Method Not Found
+  - 418 I'm a teapot (The server refuses the attempt to brew coffee with a teapot.)
+- **Server error responses**
+  - 500 Internal Server Error
 
 ### HEADER
 
