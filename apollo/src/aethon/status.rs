@@ -51,12 +51,30 @@ impl Display for Status {
     }
 }
 
+impl TryFrom<u16> for Status {
+    type Error = Error;
+    fn try_from(value: u16) -> Result<Self, Self::Error> {
+        match value {
+            200 => Ok(Status::OK),
+            201 => Ok(Status::Created),
+            400 => Ok(Status::BadRequest),
+            401 => Ok(Status::Unauthorized),
+            404 => Ok(Status::NotFound),
+            405 => Ok(Status::MethodNotAllowed),
+            418 => Ok(Status::ImATeapot),
+            500 => Ok(Status::InternalServerError),
+            _ => Err(Self::Error::WrongStatus),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn test_valid_status_codes() {
+        // From str
         assert_eq!(Status::from_str("200"), Ok(Status::OK));
         assert_eq!(Status::from_str("201"), Ok(Status::Created));
         assert_eq!(Status::from_str("400"), Ok(Status::BadRequest));
@@ -66,6 +84,7 @@ mod tests {
         assert_eq!(Status::from_str("418"), Ok(Status::ImATeapot));
         assert_eq!(Status::from_str("500"), Ok(Status::InternalServerError));
 
+        // To string
         assert_eq!(Status::OK.to_string(), "200");
         assert_eq!(Status::Created.to_string(), "201");
         assert_eq!(Status::BadRequest.to_string(), "400");
@@ -74,6 +93,16 @@ mod tests {
         assert_eq!(Status::MethodNotAllowed.to_string(), "405");
         assert_eq!(Status::ImATeapot.to_string(), "418");
         assert_eq!(Status::InternalServerError.to_string(), "500");
+
+        // From number
+        assert_eq!(Status::try_from(200), Ok(Status::OK));
+        assert_eq!(Status::try_from(201), Ok(Status::Created));
+        assert_eq!(Status::try_from(400), Ok(Status::BadRequest));
+        assert_eq!(Status::try_from(401), Ok(Status::Unauthorized));
+        assert_eq!(Status::try_from(404), Ok(Status::NotFound));
+        assert_eq!(Status::try_from(405), Ok(Status::MethodNotAllowed));
+        assert_eq!(Status::try_from(418), Ok(Status::ImATeapot));
+        assert_eq!(Status::try_from(500), Ok(Status::InternalServerError));
     }
 
     #[test]
@@ -81,6 +110,7 @@ mod tests {
         assert_eq!(Status::from_str("199"), Err(Error::WrongStatus));
         assert_eq!(Status::from_str("300"), Err(Error::WrongStatus));
         assert_eq!(Status::from_str("600"), Err(Error::WrongStatus));
+        assert_eq!(Status::try_from(999), Err(Error::WrongStatus));
     }
 
     #[test]

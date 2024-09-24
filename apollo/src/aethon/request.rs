@@ -35,7 +35,7 @@ impl Request {
 
         let version: u8 = Self::consume_string(&mut buffer, ' ')
             .parse()
-            .map_err(|_| Error::ParseError("Version ins't a u8"))?;
+            .map_err(|_| Error::ParseError("Version ins't an u8"))?;
         let method: Method = Self::consume_string(&mut buffer, ' ')
             .parse()
             .map_err(|_| Error::ParseError("Invalid method"))?;
