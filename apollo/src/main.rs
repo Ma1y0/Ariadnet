@@ -10,11 +10,14 @@ async fn main() -> io::Result<()> {
         .await
         .expect("Failed to bind the listener");
 
+    let mut i = 0u32;
+
     loop {
         let (mut socket, _) = listener.accept().await?;
         let mut buffer = [0u8; 1204];
         let n = socket.read(&mut buffer).await?;
-        println!("{}", String::from_utf8_lossy(&buffer[..n]));
-        println!("{:?}", &buffer[..n]);
+        Request::try_from(&buffer[..n]).unwrap();
+        i += 1;
+        println!("{i}");
     }
 }
