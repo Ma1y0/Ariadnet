@@ -73,6 +73,14 @@ impl FromStr for Request {
     }
 }
 
+impl TryFrom<&[u8]> for Request {
+    type Error = Error;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        let buffer = String::from_utf8_lossy(value);
+        Request::parse(&buffer)
+    }
+}
+
 impl Display for Request {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // Version
@@ -101,6 +109,21 @@ mod tests {
     fn test_parser_request() {
         let s = "1 GET /\na: hello\nc: b\n\nHello World";
         let req: Request = s.parse().unwrap();
+
+        let mut expected_headers: Headers = Headers::default();
+        expected_headers.insert("a", "hello");
+        expected_headers.insert("c", "b");
+
+        let expected = Request::new(1, Method::GET, "/", expected_headers, "Hello World");
+
+        // Tests
+        assert_eq!(expected, req);
+    }
+
+    #[test]
+    fn test_parser_request_from_u8_array() {
+        let s = "1 GET /\na: hello\nc: b\n\nHello World".as_bytes();
+        let req = Request::try_from(s).unwrap();
 
         let mut expected_headers: Headers = Headers::default();
         expected_headers.insert("a", "hello");

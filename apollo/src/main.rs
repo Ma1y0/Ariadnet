@@ -1,4 +1,4 @@
-use aethon::Method;
+use aethon::{Method, Request};
 use tokio::{
     io::{self, AsyncReadExt},
     net::TcpListener,

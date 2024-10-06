@@ -66,6 +66,14 @@ impl FromStr for Response {
     }
 }
 
+impl TryFrom<&[u8]> for Response {
+    type Error = Error;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        let buffer = String::from_utf8_lossy(value);
+        Response::parse(&buffer)
+    }
+}
+
 impl Display for Response {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // Version
@@ -91,6 +99,24 @@ mod tests {
     #[test]
     fn test_parse_tesponse() {
         let s: Result<Response, Error> = "1 200\nh: Hello\nw:World\n\nHello World".parse();
+        let expected = Ok(Response::new(
+            1,
+            Status::OK,
+            Headers::from(BTreeMap::from([
+                ("h".into(), "Hello".into()),
+                ("w".into(), "World".into()),
+            ])),
+            "Hello World",
+        ));
+
+        // Tests
+        assert_eq!(expected, s);
+    }
+
+    #[test]
+    fn test_parse_tesponse_u8_array() {
+        let s: Result<Response, Error> =
+            Response::try_from("1 200\nh: Hello\nw:World\n\nHello World".as_bytes());
         let expected = Ok(Response::new(
             1,
             Status::OK,
