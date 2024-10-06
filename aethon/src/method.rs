@@ -5,11 +5,15 @@ use std::str::FromStr;
 #[allow(clippy::upper_case_acronyms)]
 #[derive(Debug, PartialEq)]
 pub enum Method {
+    /// The `GET` method requests some content.
     GET,
+    /// The `POST` method submits data to the server.
     POST,
+    /// The `DELETE` method requests deletion of an item.
     DELETE,
 }
 
+/// Used for parsing.
 impl FromStr for Method {
     type Err = Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {

@@ -1,28 +1,19 @@
-use std::{
-    collections::BTreeMap,
-    fmt::Display,
-    iter::Peekable,
-    ops::{Deref, DerefMut},
-    str::Chars,
-};
+use std::{collections::BTreeMap, fmt::Display, iter::Peekable, str::Chars};
 
 use super::Error;
 
-#[derive(Debug, PartialEq)]
+/// `Headers` uses `BTreeMap` to keep headers ordered.
+#[derive(Debug, PartialEq, Default)]
 pub struct Headers(BTreeMap<Box<str>, Box<str>>);
 
 impl Headers {
-    pub fn new() -> Self {
-        Headers(BTreeMap::new())
-    }
-
     fn consume_headers(buffer: &mut Peekable<Chars>) -> String {
         let mut result = String::new();
         let mut last_char_was_newline = false;
 
         while let Some(&c) = buffer.peek() {
             if c == '\n' && last_char_was_newline {
-                buffer.next(); // consume the \n
+                buffer.next(); // Consume the \n
                 break;
             }
 
@@ -33,8 +24,8 @@ impl Headers {
         result
     }
 
-    pub fn parser_headers(buffer: &mut Peekable<Chars>) -> Result<Headers, Error> {
-        let mut headers = Headers::new();
+    pub(crate) fn parser_headers(buffer: &mut Peekable<Chars>) -> Result<Headers, Error> {
+        let mut headers = Headers::default();
         let buffer = Self::consume_headers(buffer);
 
         for line in buffer.lines() {
@@ -57,29 +48,23 @@ impl Headers {
                 return Err(Error::ParseError("Headers value can't be empty"));
             }
 
-            headers.insert(key.into(), value.into());
+            headers.0.insert(key.into(), value.into());
         }
 
         Ok(headers)
     }
-}
 
-impl Deref for Headers {
-    type Target = BTreeMap<Box<str>, Box<str>>;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for Headers {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
+    /// Inserts KV pair into the map
+    pub fn insert(
+        &mut self, key: impl Into<Box<str>>, value: impl Into<Box<str>>,
+    ) -> Option<Box<str>> {
+        self.0.insert(key.into(), value.into())
     }
 }
 
 impl Display for Headers {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for (k, v) in self.iter() {
+        for (k, v) in self.0.iter() {
             writeln!(f, "{}: {}", k, v)?;
         }
 

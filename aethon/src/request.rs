@@ -65,6 +65,7 @@ impl Request {
     }
 }
 
+/// Used for parsing.
 impl FromStr for Request {
     type Err = Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -101,9 +102,9 @@ mod tests {
         let s = "1 GET /\na: hello\nc: b\n\nHello World";
         let req: Request = s.parse().unwrap();
 
-        let mut expected_headers: Headers = Headers::new();
-        expected_headers.insert("a".into(), "hello".into());
-        expected_headers.insert("c".into(), "b".into());
+        let mut expected_headers: Headers = Headers::default();
+        expected_headers.insert("a", "hello");
+        expected_headers.insert("c", "b");
 
         let expected = Request::new(1, Method::GET, "/", expected_headers, "Hello World");
 
@@ -124,7 +125,7 @@ mod tests {
     fn test_parse_packet_without_headers() {
         let s = "1 GET /\n\n\n";
         let req: Request = s.parse().unwrap();
-        let expected = Request::new(1, Method::GET, "/", Headers::new(), "");
+        let expected = Request::new(1, Method::GET, "/", Headers::default(), "");
 
         // Tests
         assert_eq!(expected, req);

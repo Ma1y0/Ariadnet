@@ -58,6 +58,7 @@ impl Response {
     }
 }
 
+/// Used for parsing
 impl FromStr for Response {
     type Err = Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
